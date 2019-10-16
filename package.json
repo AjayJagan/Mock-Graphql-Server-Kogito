@@ -1,0 +1,14 @@
+{
+  "name": "Graphql-Mock-Backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.9.6",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.4"
+  }
+}
