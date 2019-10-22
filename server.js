@@ -19,11 +19,11 @@ const typeDefs = gql`
     rootProcessId: String
     roles: [String!]
     state: ProcessInstanceState!
-    endpoint: String
+    endpoint: String!
     nodes: [NodeInstance!]!
     variables: String
-    start: String
-    end: String
+    start: DateTime!
+    end: DateTime
   }
 
   type ProcessInstanceMeta {
@@ -36,8 +36,8 @@ const typeDefs = gql`
     roles: [String!]
     state: ProcessInstanceState!
     endpoint: String!
-    start: String
-    end: String
+    start: DateTime!
+    end: DateTime
   }
 
   enum ProcessInstanceState {
@@ -53,25 +53,25 @@ const typeDefs = gql`
     id: String!
     name: String!
     type: String!
-    enter: String
-    exit: String
+    enter: DateTime!
+    exit: DateTime
     definitionId: String!
     nodeId: String!
   }
 
   type Query {
     ProcessInstances(filter: ProcessInstanceFilter): [ProcessInstance]
-    AllProcessInstances: [ProcessInstance]
     UserTaskInstances(filter: UserTaskInstanceFilter): [UserTaskInstance]
   }
 
   input ProcessInstanceFilter {
     state: [ProcessInstanceState!]
     id: [String!]
+    parentProcessInstanceId: [String!]
+    rootProcessInstanceId: [String!]
     processId: [String!]
     limit: Int
     offset: Int
-    parentProcessInstanceId: String
   }
 
   type UserTaskInstance {
@@ -137,598 +137,512 @@ const typeDefs = gql`
 // Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
-    AllProcessInstances: () => {
-      const data = [
-        {
-          id: "e1308c27-dab7-4680-b98b-c99e5eb0d70c",
-          processId: "hotelBooking",
-          parentProcessInstanceId: "3619de44-13be-4225-bd22-725a9a8ccb2a",
-          processName: "HotelBooking",
-          roles: [],
-          state: "COMPLETED",
-          variables:
-            '{"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Brisbane","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "End Event 1",
-              definitionId: "EndEvent_1",
-              id: "6dac63bc-3fae-466f-b58a-b85af189d9ad",
-              enter: "2019-10-16T04:44:32.932Z",
-              exit: "2019-10-16T04:44:32.932Z"
-            },
-            {
-              name: "Book hotel",
-              definitionId: "ServiceTask_1",
-              id: "03125a62-655d-4640-98a2-82b5172f7544",
-              enter: "2019-10-16T04:44:32.929Z",
-              exit: "2019-10-16T04:44:32.932Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "98a41db9-e1b5-4333-a15f-22e6e0a6297f",
-              enter: "2019-10-16T04:44:32.928Z",
-              exit: "2019-10-16T04:44:32.929Z"
-            }
-          ]
-        },
-        {
-          id: "d7b911f8-2eaa-4adb-b392-089e2a40ae03",
-          processId: "flightBooking",
-          parentProcessInstanceId: "3619de44-13be-4225-bd22-725a9a8ccb2a",
-          processName: "FlightBooking",
-          roles: [],
-          state: "COMPLETED",
-          variables:
-            '{"flight":{"arrival":"2019-10-25T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "End Event 1",
-              definitionId: "EndEvent_1",
-              id: "59fe733c-4eff-4b97-8d80-4e7609a3feaf",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
-            },
-            {
-              name: "Book flight",
-              definitionId: "ServiceTask_1",
-              id: "28b1ca3d-5134-49c5-be48-8002f65b8dae",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "efd5216f-bf3a-4a6f-92a6-679cde23948d",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
-            }
-          ]
-        },
-        {
-          id: "3619de44-13be-4225-bd22-725a9a8ccb2a",
-          processId: "travels",
-          parentProcessInstanceId: null,
-          processName: "travels",
-          roles: [],
-          state: "COMPLETED",
-          variables:
-            '{"flight":{"arrival":"2019-10-25T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Brisbane","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "End Event 1",
-              definitionId: "EndEvent_1",
-              id: "f6b400d4-2795-4f1c-a0a1-5e931475bd63",
-              enter: "2019-10-16T04:56:42.927Z",
-              exit: "2019-10-16T04:56:42.927Z"
-            },
-            {
-              name: "Confirm travel",
-              definitionId: "UserTask_2",
-              id: "2826eed2-8156-455e-a319-a5060a2a792c",
-              enter: "2019-10-16T04:44:32.941Z",
-              exit: "2019-10-16T04:56:42.927Z"
-            },
-            {
-              name: "Book Hotel",
-              definitionId: "CallActivity_1",
-              id: "eb6941da-ccb1-450c-b6ac-c06113db44dd",
-              enter: "2019-10-16T04:44:32.927Z",
-              exit: "2019-10-16T04:44:32.937Z"
-            },
-            {
-              name: "Join",
-              definitionId: "ParallelGateway_2",
-              id: "902556e9-3914-4dcb-94d3-daef64d1274c",
-              enter: "2019-10-16T04:44:32.94Z",
-              exit: "2019-10-16T04:44:32.941Z"
-            },
-            {
-              name: "Book Flight",
-              definitionId: "CallActivity_2",
-              id: "15df98c6-7d20-475f-a74a-460d4f3c52bb",
-              enter: "2019-10-16T04:44:32.937Z",
-              exit: "2019-10-16T04:44:32.94Z"
-            },
-            {
-              name: "Book",
-              definitionId: "ParallelGateway_1",
-              id: "b0c975c1-ae37-4fd0-a9e8-0e4516dab5ba",
-              enter: "2019-10-16T04:44:32.926Z",
-              exit: "2019-10-16T04:44:32.937Z"
-            },
-            {
-              name: "Join",
-              definitionId: "ExclusiveGateway_2",
-              id: "0bce313d-e674-4c5b-ac53-a43d80ff4b33",
-              enter: "2019-10-16T04:44:32.926Z",
-              exit: "2019-10-16T04:44:32.926Z"
-            },
-            {
-              name: "is visa required",
-              definitionId: "ExclusiveGateway_1",
-              id: "a8dce6f6-cd1e-4455-ab56-33ace8f0364a",
-              enter: "2019-10-16T04:44:32.925Z",
-              exit: "2019-10-16T04:44:32.926Z"
-            },
-            {
-              name: "Visa check",
-              definitionId: "BusinessRuleTask_1",
-              id: "1f9f3b3c-bd2a-49b3-bd8b-826c7d1913a9",
-              enter: "2019-10-16T04:44:32.873Z",
-              exit: "2019-10-16T04:44:32.925Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "17e3c74c-88e9-4e4d-82b5-2e9d3f38aadb",
-              enter: "2019-10-16T04:44:32.871Z",
-              exit: "2019-10-16T04:44:32.873Z"
-            }
-          ]
-        },
-        {
-          id: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
-          processId: "travels",
-          parentProcessInstanceId: null,
-          processName: "travels",
-          roles: [],
-          state: "ACTIVE",
-          variables:
-            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "Book Flight",
-              definitionId: "CallActivity_2",
-              id: "fec270e7-afc1-4612-bbdf-43e4d79d1612",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.378Z"
-            },
-            {
-              name: "Confirm travel",
-              definitionId: "UserTask_2",
-              id: "ebee96bb-ec8c-4e12-bb04-015ada9684f6",
-              enter: "2019-10-16T04:57:04.382Z",
-              exit: null
-            },
-            {
-              name: "Join",
-              definitionId: "ParallelGateway_2",
-              id: "73d98813-4bb9-4b18-b76d-2974f8e1de0c",
-              enter: "2019-10-16T04:57:04.381Z",
-              exit: "2019-10-16T04:57:04.381Z"
-            },
-            {
-              name: "Book Hotel",
-              definitionId: "CallActivity_1",
-              id: "04e1c3dc-c37c-4fc0-b253-dea189e62357",
-              enter: "2019-10-16T04:57:04.378Z",
-              exit: "2019-10-16T04:57:04.381Z"
-            },
-            {
-              name: "Book",
-              definitionId: "ParallelGateway_1",
-              id: "c6beb2de-107d-47cd-997c-d484aa3aadaa",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.378Z"
-            },
-            {
-              name: "Join",
-              definitionId: "ExclusiveGateway_2",
-              id: "a1516462-3e70-45ee-80d4-069ea363dccc",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.375Z"
-            },
-            {
-              name: "is visa required",
-              definitionId: "ExclusiveGateway_1",
-              id: "f44296c1-4eca-4195-b9aa-5d7e027e34e4",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.375Z"
-            },
-            {
-              name: "Visa check",
-              definitionId: "BusinessRuleTask_1",
-              id: "112504e6-8642-4e54-9aa5-46b9d156bc9a",
-              enter: "2019-10-16T04:57:04.367Z",
-              exit: "2019-10-16T04:57:04.375Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "e1814458-aca4-45b4-bd8a-4c3a71de71b3",
-              enter: "2019-10-16T04:57:04.367Z",
-              exit: "2019-10-16T04:57:04.367Z"
-            }
-          ]
-        },
-        {
-          id: "70a4ead8-0597-403c-b361-361100b5614b",
-          processId: "flightBooking",
-          parentProcessInstanceId: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
-          processName: "FlightBooking",
-          roles: [],
-          state: "COMPLETED",
-          variables:
-            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "End Event 1",
-              definitionId: "EndEvent_1",
-              id: "354b5354-a6bf-44e2-9395-9c628523cac8",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
-            },
-            {
-              name: "Book flight",
-              definitionId: "ServiceTask_1",
-              id: "a6e1b4c8-85b6-4ace-acab-6ab21be8ad0d",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "718da164-24e6-426a-a8be-ad3b60a8b658",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
-            }
-          ]
-        },
-        {
-          id: "9020cf58-8f7b-4d91-ba6c-17513beed764",
-          processId: "hotelBooking",
-          parentProcessInstanceId: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
-          processName: "HotelBooking",
-          roles: [],
-          state: "COMPLETED",
-          variables:
-            '{"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
-          nodes: [
-            {
-              name: "End Event 1",
-              definitionId: "EndEvent_1",
-              id: "6846df98-3484-4f02-a48d-a5e599fa5532",
-              enter: "2019-10-16T04:57:04.38Z",
-              exit: "2019-10-16T04:57:04.38Z"
-            },
-            {
-              name: "Book hotel",
-              definitionId: "ServiceTask_1",
-              id: "93083686-38c8-4e77-b05a-d00e6a196a1d",
-              enter: "2019-10-16T04:57:04.379Z",
-              exit: "2019-10-16T04:57:04.38Z"
-            },
-            {
-              name: "StartProcess",
-              definitionId: "StartEvent_1",
-              id: "dd64920c-71ef-4070-b0fb-a861846a1d0e",
-              enter: "2019-10-16T04:57:04.379Z",
-              exit: "2019-10-16T04:57:04.379Z"
-            }
-          ]
-        }
-      ];
-      return data;
-    },
     ProcessInstances: (parent, args, context, info) => {
       const data = [
         {
-          id: "e1308c27-dab7-4680-b98b-c99e5eb0d70c",
+          id: "a1e139d5-4e77-48c9-84ae-34578e904e5a",
           processId: "hotelBooking",
-          parentProcessInstanceId: "3619de44-13be-4225-bd22-725a9a8ccb2a",
+          parentProcessInstanceId: "e4448857-fa0c-403b-ad69-f0a353458b9d",
           processName: "HotelBooking",
           roles: [],
           state: "COMPLETED",
           variables:
-            '{"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Brisbane","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"US","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"US"}}',
           nodes: [
             {
               name: "End Event 1",
               definitionId: "EndEvent_1",
-              id: "6dac63bc-3fae-466f-b58a-b85af189d9ad",
-              enter: "2019-10-16T04:44:32.932Z",
-              exit: "2019-10-16T04:44:32.932Z"
+              id: "27107f38-d888-4edf-9a4f-11b9e6d751b6",
+              enter: "2019-10-22T03:37:30.798Z",
+              exit: "2019-10-22T03:37:30.798Z",
+              type: "EndNode"
             },
             {
               name: "Book hotel",
               definitionId: "ServiceTask_1",
-              id: "03125a62-655d-4640-98a2-82b5172f7544",
-              enter: "2019-10-16T04:44:32.929Z",
-              exit: "2019-10-16T04:44:32.932Z"
+              id: "41b3f49e-beb3-4b5f-8130-efd28f82b971",
+              enter: "2019-10-22T03:37:30.795Z",
+              exit: "2019-10-22T03:37:30.798Z",
+              type: "WorkItemNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "98a41db9-e1b5-4333-a15f-22e6e0a6297f",
-              enter: "2019-10-16T04:44:32.928Z",
-              exit: "2019-10-16T04:44:32.929Z"
+              id: "4165a571-2c79-4fd0-921e-c6d5e7851b67",
+              enter: "2019-10-22T03:37:30.793Z",
+              exit: "2019-10-22T03:37:30.795Z",
+              type: "StartNode"
             }
-          ]
+          ],
+          childProcessInstanceId: []
         },
         {
-          id: "d7b911f8-2eaa-4adb-b392-089e2a40ae03",
+          id: "a23e6c20-02c2-4c2b-8c5c-e988a0adf862",
           processId: "flightBooking",
-          parentProcessInstanceId: "3619de44-13be-4225-bd22-725a9a8ccb2a",
+          parentProcessInstanceId: "e4448857-fa0c-403b-ad69-f0a353458b9d",
           processName: "FlightBooking",
           roles: [],
           state: "COMPLETED",
           variables:
-            '{"flight":{"arrival":"2019-10-25T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-22T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"US","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"US"}}',
           nodes: [
             {
               name: "End Event 1",
               definitionId: "EndEvent_1",
-              id: "59fe733c-4eff-4b97-8d80-4e7609a3feaf",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
+              id: "8ac1fc9d-6de2-4b23-864e-ba79315db317",
+              enter: "2019-10-22T03:37:30.804Z",
+              exit: "2019-10-22T03:37:30.804Z",
+              type: "EndNode"
             },
             {
               name: "Book flight",
               definitionId: "ServiceTask_1",
-              id: "28b1ca3d-5134-49c5-be48-8002f65b8dae",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
+              id: "2efa0617-d155-44dc-9b1e-38efc0dcec02",
+              enter: "2019-10-22T03:37:30.804Z",
+              exit: "2019-10-22T03:37:30.804Z",
+              type: "WorkItemNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "efd5216f-bf3a-4a6f-92a6-679cde23948d",
-              enter: "2019-10-16T04:44:32.938Z",
-              exit: "2019-10-16T04:44:32.938Z"
+              id: "849d5bf2-4032-4897-8b30-179ce9d3444b",
+              enter: "2019-10-22T03:37:30.804Z",
+              exit: "2019-10-22T03:37:30.804Z",
+              type: "StartNode"
             }
-          ]
+          ],
+          childProcessInstanceId: []
         },
         {
-          id: "3619de44-13be-4225-bd22-725a9a8ccb2a",
+          id: "e4448857-fa0c-403b-ad69-f0a353458b9d",
           processId: "travels",
           parentProcessInstanceId: null,
           processName: "travels",
           roles: [],
           state: "COMPLETED",
           variables:
-            '{"flight":{"arrival":"2019-10-25T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Brisbane","country":"India","end":"2019-10-25T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Brisbane","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"India","street":"test","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-22T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"US","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"US"}}',
           nodes: [
             {
               name: "End Event 1",
               definitionId: "EndEvent_1",
-              id: "f6b400d4-2795-4f1c-a0a1-5e931475bd63",
-              enter: "2019-10-16T04:56:42.927Z",
-              exit: "2019-10-16T04:56:42.927Z"
+              id: "870bdda0-be04-4e59-bb0b-f9b665eaacc9",
+              enter: "2019-10-22T03:37:38.586Z",
+              exit: "2019-10-22T03:37:38.586Z",
+              type: "EndNode"
             },
             {
               name: "Confirm travel",
               definitionId: "UserTask_2",
-              id: "2826eed2-8156-455e-a319-a5060a2a792c",
-              enter: "2019-10-16T04:44:32.941Z",
-              exit: "2019-10-16T04:56:42.927Z"
+              id: "6b4a4fe9-4aab-4e8c-bb79-27b8b6b88d1f",
+              enter: "2019-10-22T03:37:30.807Z",
+              exit: "2019-10-22T03:37:38.586Z",
+              type: "HumanTaskNode"
             },
             {
               name: "Book Hotel",
               definitionId: "CallActivity_1",
-              id: "eb6941da-ccb1-450c-b6ac-c06113db44dd",
-              enter: "2019-10-16T04:44:32.927Z",
-              exit: "2019-10-16T04:44:32.937Z"
+              id: "dd33de7c-c39c-484a-83a8-3e1b007fce95",
+              enter: "2019-10-22T03:37:30.793Z",
+              exit: "2019-10-22T03:37:30.803Z",
+              type: "SubProcessNode"
             },
             {
               name: "Join",
               definitionId: "ParallelGateway_2",
-              id: "902556e9-3914-4dcb-94d3-daef64d1274c",
-              enter: "2019-10-16T04:44:32.94Z",
-              exit: "2019-10-16T04:44:32.941Z"
+              id: "08c153e8-2766-4675-81f7-29943efdf411",
+              enter: "2019-10-22T03:37:30.806Z",
+              exit: "2019-10-22T03:37:30.807Z",
+              type: "Join"
             },
             {
               name: "Book Flight",
               definitionId: "CallActivity_2",
-              id: "15df98c6-7d20-475f-a74a-460d4f3c52bb",
-              enter: "2019-10-16T04:44:32.937Z",
-              exit: "2019-10-16T04:44:32.94Z"
+              id: "683cf307-f082-4a8e-9c85-d5a11b13903a",
+              enter: "2019-10-22T03:37:30.803Z",
+              exit: "2019-10-22T03:37:30.806Z",
+              type: "SubProcessNode"
             },
             {
               name: "Book",
               definitionId: "ParallelGateway_1",
-              id: "b0c975c1-ae37-4fd0-a9e8-0e4516dab5ba",
-              enter: "2019-10-16T04:44:32.926Z",
-              exit: "2019-10-16T04:44:32.937Z"
+              id: "cf057e58-4113-46c0-be13-6de42ea8377e",
+              enter: "2019-10-22T03:37:30.792Z",
+              exit: "2019-10-22T03:37:30.803Z",
+              type: "Split"
             },
             {
               name: "Join",
               definitionId: "ExclusiveGateway_2",
-              id: "0bce313d-e674-4c5b-ac53-a43d80ff4b33",
-              enter: "2019-10-16T04:44:32.926Z",
-              exit: "2019-10-16T04:44:32.926Z"
+              id: "415a52c0-dc1f-4a93-9238-862dc8072262",
+              enter: "2019-10-22T03:37:30.792Z",
+              exit: "2019-10-22T03:37:30.792Z",
+              type: "Join"
             },
             {
               name: "is visa required",
               definitionId: "ExclusiveGateway_1",
-              id: "a8dce6f6-cd1e-4455-ab56-33ace8f0364a",
-              enter: "2019-10-16T04:44:32.925Z",
-              exit: "2019-10-16T04:44:32.926Z"
+              id: "52d64298-3f28-4aba-a812-dba4077c9665",
+              enter: "2019-10-22T03:37:30.79Z",
+              exit: "2019-10-22T03:37:30.792Z",
+              type: "Split"
             },
             {
               name: "Visa check",
               definitionId: "BusinessRuleTask_1",
-              id: "1f9f3b3c-bd2a-49b3-bd8b-826c7d1913a9",
-              enter: "2019-10-16T04:44:32.873Z",
-              exit: "2019-10-16T04:44:32.925Z"
+              id: "6fdee287-08f6-49c2-af2d-2d125ba76ab7",
+              enter: "2019-10-22T03:37:30.755Z",
+              exit: "2019-10-22T03:37:30.79Z",
+              type: "RuleSetNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "17e3c74c-88e9-4e4d-82b5-2e9d3f38aadb",
-              enter: "2019-10-16T04:44:32.871Z",
-              exit: "2019-10-16T04:44:32.873Z"
+              id: "d98c1762-9d3c-4228-9ffc-bc3f423079c0",
+              enter: "2019-10-22T03:37:30.753Z",
+              exit: "2019-10-22T03:37:30.754Z",
+              type: "StartNode"
             }
+          ],
+          childProcessInstanceId: [
+            "a23e6c20-02c2-4c2b-8c5c-e988a0adf862",
+            "a1e139d5-4e77-48c9-84ae-34578e904e5a"
           ]
         },
         {
-          id: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
+          id: "fc1b6535-d557-40df-82c8-b425b9dc531b",
+          processId: "flightBooking",
+          parentProcessInstanceId: "538f9feb-5a14-4096-b791-2055b38da7c6",
+          processName: "FlightBooking",
+          roles: [],
+          state: "COMPLETED",
+          variables:
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-23T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-10-23T22:00:00Z[UTC]","city":"New York","country":"US","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Berlin","country":"Germany","street":"Bakers","zipCode":"100200"},"email":"cristiano@redhat.com","firstName":"Cristiano","lastName":"Nicolai","nationality":"German"}}',
+          nodes: [
+            {
+              name: "End Event 1",
+              definitionId: "EndEvent_1",
+              id: "18d9e3df-22d2-429c-98d7-f4f2a7b1b471",
+              enter: "2019-10-22T03:40:44.086Z",
+              exit: "2019-10-22T03:40:44.086Z",
+              type: "EndNode"
+            },
+            {
+              name: "Book flight",
+              definitionId: "ServiceTask_1",
+              id: "8a533611-9766-428f-b7ff-78156fc4851d",
+              enter: "2019-10-22T03:40:44.086Z",
+              exit: "2019-10-22T03:40:44.086Z",
+              type: "WorkItemNode"
+            },
+            {
+              name: "StartProcess",
+              definitionId: "StartEvent_1",
+              id: "2f423120-13ea-4277-97f6-6b7a4b4630d0",
+              enter: "2019-10-22T03:40:44.086Z",
+              exit: "2019-10-22T03:40:44.086Z",
+              type: "StartNode"
+            }
+          ],
+          childProcessInstanceId: []
+        },
+        {
+          id: "ff65b793-bb88-4567-b7e3-73eee35772a4",
+          processId: "hotelBooking",
+          parentProcessInstanceId: "538f9feb-5a14-4096-b791-2055b38da7c6",
+          processName: "HotelBooking",
+          roles: [],
+          state: "COMPLETED",
+          variables:
+            '{"trip":{"begin":"2019-10-23T22:00:00Z[UTC]","city":"New York","country":"US","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"New York","country":"US","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Berlin","country":"Germany","street":"Bakers","zipCode":"100200"},"email":"cristiano@redhat.com","firstName":"Cristiano","lastName":"Nicolai","nationality":"German"}}',
+          nodes: [
+            {
+              name: "End Event 1",
+              definitionId: "EndEvent_1",
+              id: "ed36cd72-5e52-4a53-9d0d-865c98781282",
+              enter: "2019-10-22T03:40:44.088Z",
+              exit: "2019-10-22T03:40:44.088Z",
+              type: "EndNode"
+            },
+            {
+              name: "Book hotel",
+              definitionId: "ServiceTask_1",
+              id: "040cd02a-7f4c-4d41-bda5-4889f82e921f",
+              enter: "2019-10-22T03:40:44.088Z",
+              exit: "2019-10-22T03:40:44.088Z",
+              type: "WorkItemNode"
+            },
+            {
+              name: "StartProcess",
+              definitionId: "StartEvent_1",
+              id: "8528c7bf-8ac8-401f-b7e5-6f3e69b9f9f2",
+              enter: "2019-10-22T03:40:44.088Z",
+              exit: "2019-10-22T03:40:44.088Z",
+              type: "StartNode"
+            }
+          ],
+          childProcessInstanceId: []
+        },
+        {
+          id: "538f9feb-5a14-4096-b791-2055b38da7c6",
+          processId: "travels",
+          parentProcessInstanceId: null,
+          processName: "travels",
+          roles: [],
+          state: "ABORTED",
+          variables:
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-23T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-10-23T22:00:00Z[UTC]","city":"New York","country":"US","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"New York","country":"US","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Berlin","country":"Germany","street":"Bakers","zipCode":"100200"},"email":"cristiano@redhat.com","firstName":"Cristiano","lastName":"Nicolai","nationality":"German"}}',
+          nodes: [
+            {
+              name: "Confirm travel",
+              definitionId: "UserTask_2",
+              id: "69e0a0f5-2360-4174-a8f8-a892a31fc2f9",
+              enter: "2019-10-22T03:40:44.089Z",
+              exit: "2019-10-22T04:42:07.246Z",
+              type: "HumanTaskNode"
+            },
+            {
+              name: "Book Flight",
+              definitionId: "CallActivity_2",
+              id: "4cb855b9-e3e4-488d-ae1a-9ea3b8490dba",
+              enter: "2019-10-22T03:40:44.086Z",
+              exit: "2019-10-22T03:40:44.087Z",
+              type: "SubProcessNode"
+            },
+            {
+              name: "Join",
+              definitionId: "ParallelGateway_2",
+              id: "1da9af80-c70e-47b8-9c87-964468fc0b46",
+              enter: "2019-10-22T03:40:44.089Z",
+              exit: "2019-10-22T03:40:44.089Z",
+              type: "Join"
+            },
+            {
+              name: "Book Hotel",
+              definitionId: "CallActivity_1",
+              id: "f9b90c32-51da-4986-9603-8c800a6b71b1",
+              enter: "2019-10-22T03:40:44.087Z",
+              exit: "2019-10-22T03:40:44.089Z",
+              type: "SubProcessNode"
+            },
+            {
+              name: "Book",
+              definitionId: "ParallelGateway_1",
+              id: "f8d7fe9e-0f3e-4919-8fa7-82e0b6821aa9",
+              enter: "2019-10-22T03:40:44.085Z",
+              exit: "2019-10-22T03:40:44.087Z",
+              type: "Split"
+            },
+            {
+              name: "Join",
+              definitionId: "ExclusiveGateway_2",
+              id: "55fd6d56-e4d4-4021-b6c6-02c3c5cb86ce",
+              enter: "2019-10-22T03:40:44.085Z",
+              exit: "2019-10-22T03:40:44.085Z",
+              type: "Join"
+            },
+            {
+              name: "is visa required",
+              definitionId: "ExclusiveGateway_1",
+              id: "fe6b2d9e-6cfd-415a-8e92-5d2be541c3ff",
+              enter: "2019-10-22T03:40:44.085Z",
+              exit: "2019-10-22T03:40:44.085Z",
+              type: "Split"
+            },
+            {
+              name: "Visa check",
+              definitionId: "BusinessRuleTask_1",
+              id: "3bd30bf9-96ba-4f5d-9ed0-981963288418",
+              enter: "2019-10-22T03:40:44.07Z",
+              exit: "2019-10-22T03:40:44.085Z",
+              type: "RuleSetNode"
+            },
+            {
+              name: "StartProcess",
+              definitionId: "StartEvent_1",
+              id: "739fc473-157d-4b4e-8ad6-e4c28499d24e",
+              enter: "2019-10-22T03:40:44.07Z",
+              exit: "2019-10-22T03:40:44.07Z",
+              type: "StartNode"
+            }
+          ],
+          childProcessInstanceId: [
+            "fc1b6535-d557-40df-82c8-b425b9dc531b",
+            "ff65b793-bb88-4567-b7e3-73eee35772a4"
+          ]
+        },
+        {
+          id: "8035b580-6ae4-4aa8-9ec0-e18e19809e0b",
           processId: "travels",
           parentProcessInstanceId: null,
           processName: "travels",
           roles: [],
           state: "ACTIVE",
           variables:
-            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-22T22:00:00Z[UTC]","flightNumber":"MX555"},"hotel":{"address":{"city":"Berlin","country":"Germany","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Berlin","country":"Germany","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Karkow","country":"Poland","street":"palna","zipCode":"200300"},"email":"rob@redhat.com","firstName":"Rob","lastName":"Rob","nationality":"Polish"}}',
           nodes: [
             {
               name: "Book Flight",
               definitionId: "CallActivity_2",
-              id: "fec270e7-afc1-4612-bbdf-43e4d79d1612",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.378Z"
+              id: "7cdeba99-cd36-4425-980d-e59d44769a3e",
+              enter: "2019-10-22T04:43:01.143Z",
+              exit: "2019-10-22T04:43:01.146Z",
+              type: "SubProcessNode"
             },
             {
               name: "Confirm travel",
               definitionId: "UserTask_2",
-              id: "ebee96bb-ec8c-4e12-bb04-015ada9684f6",
-              enter: "2019-10-16T04:57:04.382Z",
-              exit: null
+              id: "843bd287-fb6e-4ee7-a304-ba9b430e52d8",
+              enter: "2019-10-22T04:43:01.148Z",
+              exit: null,
+              type: "HumanTaskNode"
             },
             {
               name: "Join",
               definitionId: "ParallelGateway_2",
-              id: "73d98813-4bb9-4b18-b76d-2974f8e1de0c",
-              enter: "2019-10-16T04:57:04.381Z",
-              exit: "2019-10-16T04:57:04.381Z"
+              id: "fd2e12d5-6a4b-4c75-9f31-028d3f032a95",
+              enter: "2019-10-22T04:43:01.148Z",
+              exit: "2019-10-22T04:43:01.148Z",
+              type: "Join"
             },
             {
               name: "Book Hotel",
               definitionId: "CallActivity_1",
-              id: "04e1c3dc-c37c-4fc0-b253-dea189e62357",
-              enter: "2019-10-16T04:57:04.378Z",
-              exit: "2019-10-16T04:57:04.381Z"
+              id: "7f7d74c1-78f7-49be-b5ad-8d132f46a49c",
+              enter: "2019-10-22T04:43:01.146Z",
+              exit: "2019-10-22T04:43:01.148Z",
+              type: "SubProcessNode"
             },
             {
               name: "Book",
               definitionId: "ParallelGateway_1",
-              id: "c6beb2de-107d-47cd-997c-d484aa3aadaa",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.378Z"
+              id: "af0d984c-4abd-4f5c-83a8-426e6b3d102a",
+              enter: "2019-10-22T04:43:01.143Z",
+              exit: "2019-10-22T04:43:01.146Z",
+              type: "Split"
             },
             {
               name: "Join",
               definitionId: "ExclusiveGateway_2",
-              id: "a1516462-3e70-45ee-80d4-069ea363dccc",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.375Z"
+              id: "b2761011-3043-4f48-82bd-1395bf651a91",
+              enter: "2019-10-22T04:43:01.143Z",
+              exit: "2019-10-22T04:43:01.143Z",
+              type: "Join"
             },
             {
               name: "is visa required",
               definitionId: "ExclusiveGateway_1",
-              id: "f44296c1-4eca-4195-b9aa-5d7e027e34e4",
-              enter: "2019-10-16T04:57:04.375Z",
-              exit: "2019-10-16T04:57:04.375Z"
+              id: "a91a2600-d0cd-46ff-a6c6-b3081612d1af",
+              enter: "2019-10-22T04:43:01.143Z",
+              exit: "2019-10-22T04:43:01.143Z",
+              type: "Split"
             },
             {
               name: "Visa check",
               definitionId: "BusinessRuleTask_1",
-              id: "112504e6-8642-4e54-9aa5-46b9d156bc9a",
-              enter: "2019-10-16T04:57:04.367Z",
-              exit: "2019-10-16T04:57:04.375Z"
+              id: "1baa5de4-47cc-45a8-8323-005388191e4f",
+              enter: "2019-10-22T04:43:01.135Z",
+              exit: "2019-10-22T04:43:01.143Z",
+              type: "RuleSetNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "e1814458-aca4-45b4-bd8a-4c3a71de71b3",
-              enter: "2019-10-16T04:57:04.367Z",
-              exit: "2019-10-16T04:57:04.367Z"
+              id: "90e5a337-1c26-4fcc-8ee2-d20e6ba2a1a3",
+              enter: "2019-10-22T04:43:01.135Z",
+              exit: "2019-10-22T04:43:01.135Z",
+              type: "StartNode"
             }
+          ],
+          childProcessInstanceId: [
+            "c54ca5b0-b975-46e2-a9a0-6a86bf7ac21e",
+            "2d962eef-45b8-48a9-ad4e-9cde0ad6af88"
           ]
         },
         {
-          id: "70a4ead8-0597-403c-b361-361100b5614b",
+          id: "c54ca5b0-b975-46e2-a9a0-6a86bf7ac21e",
           processId: "flightBooking",
-          parentProcessInstanceId: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
+          parentProcessInstanceId: "8035b580-6ae4-4aa8-9ec0-e18e19809e0b",
           processName: "FlightBooking",
           roles: [],
           state: "COMPLETED",
           variables:
-            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-09-30T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"flight":{"arrival":"2019-10-30T22:00:00Z[UTC]","departure":"2019-10-22T22:00:00Z[UTC]","flightNumber":"MX555"},"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Berlin","country":"Germany","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"traveller":{"address":{"city":"Karkow","country":"Poland","street":"palna","zipCode":"200300"},"email":"rob@redhat.com","firstName":"Rob","lastName":"Rob","nationality":"Polish"}}',
           nodes: [
             {
               name: "End Event 1",
               definitionId: "EndEvent_1",
-              id: "354b5354-a6bf-44e2-9395-9c628523cac8",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
+              id: "7244ba1b-75ec-4789-8c65-499a0c5b1a6f",
+              enter: "2019-10-22T04:43:01.144Z",
+              exit: "2019-10-22T04:43:01.144Z",
+              type: "EndNode"
             },
             {
               name: "Book flight",
               definitionId: "ServiceTask_1",
-              id: "a6e1b4c8-85b6-4ace-acab-6ab21be8ad0d",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
+              id: "2f588da5-a323-4111-9017-3093ef9319d1",
+              enter: "2019-10-22T04:43:01.144Z",
+              exit: "2019-10-22T04:43:01.144Z",
+              type: "WorkItemNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "718da164-24e6-426a-a8be-ad3b60a8b658",
-              enter: "2019-10-16T04:57:04.376Z",
-              exit: "2019-10-16T04:57:04.376Z"
+              id: "6ed7aa17-4bb1-48e3-b34a-5a4c5773dff2",
+              enter: "2019-10-22T04:43:01.144Z",
+              exit: "2019-10-22T04:43:01.144Z",
+              type: "StartNode"
             }
-          ]
+          ],
+          childProcessInstanceId: []
         },
         {
-          id: "9020cf58-8f7b-4d91-ba6c-17513beed764",
+          id: "2d962eef-45b8-48a9-ad4e-9cde0ad6af88",
           processId: "hotelBooking",
-          parentProcessInstanceId: "f0df27b1-85f9-442b-8720-aa2d6fdb0877",
+          parentProcessInstanceId: "8035b580-6ae4-4aa8-9ec0-e18e19809e0b",
           processName: "HotelBooking",
           roles: [],
           state: "COMPLETED",
           variables:
-            '{"trip":{"begin":"2019-09-30T22:00:00Z[UTC]","city":"Bangalore","country":"India","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Bangalore","country":"India","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Bangalore","country":"Poland","street":"Bangalore","zipCode":"560093"},"email":"ajaganat@redhat.com","firstName":"Ajay","lastName":"Jaganathan","nationality":"Polish"}}',
+            '{"trip":{"begin":"2019-10-22T22:00:00Z[UTC]","city":"Berlin","country":"Germany","end":"2019-10-30T22:00:00Z[UTC]","visaRequired":false},"hotel":{"address":{"city":"Berlin","country":"Germany","street":"street","zipCode":"12345"},"bookingNumber":"XX-012345","name":"Perfect hotel","phone":"09876543"},"traveller":{"address":{"city":"Karkow","country":"Poland","street":"palna","zipCode":"200300"},"email":"rob@redhat.com","firstName":"Rob","lastName":"Rob","nationality":"Polish"}}',
           nodes: [
             {
               name: "End Event 1",
               definitionId: "EndEvent_1",
-              id: "6846df98-3484-4f02-a48d-a5e599fa5532",
-              enter: "2019-10-16T04:57:04.38Z",
-              exit: "2019-10-16T04:57:04.38Z"
+              id: "7a770672-8493-4566-8288-515c0b5360a8",
+              enter: "2019-10-22T04:43:01.146Z",
+              exit: "2019-10-22T04:43:01.146Z",
+              type: "EndNode"
             },
             {
               name: "Book hotel",
               definitionId: "ServiceTask_1",
-              id: "93083686-38c8-4e77-b05a-d00e6a196a1d",
-              enter: "2019-10-16T04:57:04.379Z",
-              exit: "2019-10-16T04:57:04.38Z"
+              id: "f10ed686-84f0-48b6-844e-5cfafa32a7bc",
+              enter: "2019-10-22T04:43:01.146Z",
+              exit: "2019-10-22T04:43:01.146Z",
+              type: "WorkItemNode"
             },
             {
               name: "StartProcess",
               definitionId: "StartEvent_1",
-              id: "dd64920c-71ef-4070-b0fb-a861846a1d0e",
-              enter: "2019-10-16T04:57:04.379Z",
-              exit: "2019-10-16T04:57:04.379Z"
+              id: "5a6bd73e-1d3d-43d9-8f27-8081c3014716",
+              enter: "2019-10-22T04:43:01.146Z",
+              exit: "2019-10-22T04:43:01.146Z",
+              type: "StartNode"
             }
-          ]
+          ],
+          childProcessInstanceId: []
         }
       ];
-      const result = data.filter(
-        datum =>
+      const result = data.filter(datum => {
+        console.log("args", args["filter"].parentProcessInstanceId);
+        console.log("data", datum.parentProcessInstanceId);
+        return (
           datum.parentProcessInstanceId ==
           args["filter"].parentProcessInstanceId
-      );
-      console.log(args["filter"].parentProcessInstanceId);
+        );
+      });
+      console.log();
       return result;
     }
   }
